@@ -50,65 +50,165 @@ function hslColor(h, s, l) {
 
 /* START WRITING YOUR CODE BELOW */
 
-var num = 1000;
-var vx = new Array(num);
-var vy = new Array(num);
-var x = new Array(num);
-var y = new Array(num);
-var ax = new Array(num);
-var ay = new Array(num);
+// Justin Chambers
+// 03/2018
 
-var magnetism = 10.0; //引力の強さ マイナスにすると斥力になる。
-var radius = 1 ; //描画する円の半径
-var gensoku = 0.95; // 粒子の移動を減速させる
+var particles = [];
+var nums;
+var particleDensity = 4000;
+var noiseScale = 800;
+var maxLife = 10;
+var simulationSpeed = 0.2;
+var fadeFrame = 0;
+var backgroundColor;
+var visualMode = 0;
+var numModes = 4;
+var invertColors = false;
 
 function setup(){
-  createCanvas(windowWidth,windowHeight);
-  noStroke(); 
-  fill(0);
-  ellipseMode(RADIUS);
-  background(100);
-  blendMode(ADD);
-  
-  for(var i =0; i< num; i++){
-    x[i] = random(width);
-    y[i] = random(height);
-    vx[i] = 0;
-    vy[i] = 0;
-    ax[i] = 0;
-    ay[i] = 0;
+  nums = windowWidth * windowHeight / particleDensity;
+  backgroundColor = color(20, 20, 20);
+  createCanvas(windowWidth, windowHeight);
+  background(backgroundColor);
+  for(var i = 0; i < nums; i++){
+    particles[i] = new Particle();
   }
 }
-
 
 function draw(){
-  fill(0,0,0);
-  rect(0,0,width,height);
-  ellipse(mouseX, mouseY, 20, 20);
+  noStroke();
   
-  for(var i=0; i<num; i++){
-    var distance = dist(touchX, touchY, x[i], y[i]); //dist(x1,y1,x2,y2) ２点間の距離を求める関数
-    //加速度は引力の中心からの距離の二乗に反比例する。
-    if(distance > 3){ //あまりマウスに近すぎる場合は加速度を更新しない
-      ax[i] = magnetism * (touchX - x[i]) / (distance * distance); 
-      ay[i] = magnetism * (touchY - y[i]) / (distance * distance);
+  ++fadeFrame;
+  if(fadeFrame % 5 == 0){
+    if(invertColors){
+      blendMode(ADD);
+    } else {
+      blendMode(DIFFERENCE);
     }
-    vx[i] += ax[i]; // 1フレームあたりaxだけ速度vxを増加する。
-    vy[i] += ay[i]; // 1フレームあたりayだけ速度vyを増加する.
-    
-    vx[i] = vx[i]*gensoku;
-    vy[i] = vy[i]*gensoku;
-    
-    x[i] += vx[i];  // 1フレームあたりvyピクセル進ませる。
-    y[i] += vy[i];  // 1フレームあたりvyピクセル進ませる。
-    
-    var sokudo = dist(0,0,vx[i],vy[i]); // 速度のX,Y成分から速度を求める
-    var r = map(sokudo, 0, 5, 0, 255); //速度に応じた色を計算
-    var g = map(sokudo, 0,5, 64, 255);
-    var b = map(sokudo, 0,5, 128, 255);
-    fill(r, g, b, 32);
-    ellipse(x[i],y[i],radius,radius);
+    fill(1, 1, 1);
+    rect(0,0,width,height);
+
+    if(invertColors){
+      blendMode(DARKEST);
+    } else {
+      blendMode(LIGHTEST);
+    }
+    fill(backgroundColor);
+    rect(0,0,width,height);
   }
   
+  blendMode(BLEND);
+  smooth();
+  for(var i = 0; i < nums; i++){
+    var iterations = map(i,0,nums,5,1);
+    var radius = map(i,0,nums,2,6);
+    
+    particles[i].move(iterations);
+    particles[i].checkEdge();
+    
+    var alpha = 255;
+    var particleColor;
+    var fadeRatio;
+    fadeRatio = min(particles[i].life * 5 / maxLife, 1);
+    fadeRatio = min((maxLife - particles[i].life) * 5 / maxLife, fadeRatio);
+    var colorCase = visualMode;
+    if(visualMode == 0)
+    {
+      colorCase = int(particles[i].pos.x / width * 3) + 1;
+    }
+    switch(colorCase)
+    {
+      case 1:
+        var lifeRatioGrayscale = min(255, (255 * particles[i].life / maxLife) + red(backgroundColor));
+        particleColor = color(lifeRatioGrayscale, alpha * fadeRatio);
+        break;
+      case 2:
+        particleColor = particles[i].color;
+        break;
+      case 3:
+        particleColor = color(blue(particles[i].color) + 70, green(particles[i].color) + 20, red(particles[i].color) - 50);
+        break;
+    }
+    if(invertColors){
+      particleColor = color(255 - red(particleColor), 255 - green(particleColor), 255 - blue(particleColor));
+    }
+    fill(red(particleColor), green(particleColor), blue(particleColor), alpha * fadeRatio);
+    particles[i].display(radius);
+  } 
 }
 
+function Particle(){
+// member properties and initialization
+  this.vel = createVector(0, 0);
+  this.pos = createVector(random(0, width), random(0, height));
+  this.life = random(0, maxLife);
+  this.flip = int(random(0,2)) * 2 - 1;
+  var randColor = int(random(0,3));
+  switch(randColor)
+  {
+    case 0:
+      this.color = color(110,57,204);
+      break;
+    case 1:
+      this.color = color(7,153,242);
+      break;
+    case 2:
+      this.color = color(255,255,255);
+      break;
+  }
+  
+// member functions
+  this.move = function(iterations){
+    if((this.life -= 0.01666) < 0)
+      this.respawn();
+    while(iterations > 0){
+      var angle = noise(this.pos.x/noiseScale, this.pos.y/noiseScale)*TWO_PI*noiseScale*this.flip;
+      this.vel.x = cos(angle);
+      this.vel.y = sin(angle);
+      this.vel.mult(simulationSpeed);
+      this.pos.add(this.vel);
+      --iterations;
+    }
+  }
+
+  this.checkEdge = function(){
+    if(this.pos.x > width || this.pos.x < 0 || this.pos.y > height || this.pos.y < 0){
+      this.respawn();
+    }
+  }
+  
+  this.respawn = function(){
+    this.pos.x = random(0, width);
+    this.pos.y = random(0, height);
+    this.life = maxLife;
+  }
+
+  this.display = function(r){
+    ellipse(this.pos.x, this.pos.y, r, r);
+  }
+}
+
+function advanceVisual()
+{
+  visualMode = ++visualMode % numModes;
+  if(visualMode == 0){
+    invertColors = !invertColors;
+    backgroundColor = invertColors ? color(235, 235, 235) : color(20, 20, 20);
+  }
+  noiseSeed(random()*Number.MAX_SAFE_INTEGER);
+  background(backgroundColor);
+  for(var i = 0; i < nums; i++){
+    particles[i].respawn();
+    particles[i].life = random(0,maxLife);
+  }
+}
+
+function keyPressed()
+{
+  advanceVisual();
+}
+
+function touchStarted()
+{
+  advanceVisual();
+}
