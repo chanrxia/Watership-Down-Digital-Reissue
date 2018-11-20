@@ -67,7 +67,7 @@ function setup(){
   noStroke(); 
   fill(0);
   ellipseMode(RADIUS);
-  background(0);
+  background(100);
   blendMode(ADD);
   
   for(var i =0; i< num; i++){
@@ -84,6 +84,7 @@ function setup(){
 function draw(){
   fill(0,0,0);
   rect(0,0,width,height);
+  ellipse(mouseX, mouseY, 20, 20);
   
   for(var i=0; i<num; i++){
     var distance = dist(touchX, touchY, x[i], y[i]); //dist(x1,y1,x2,y2) ２点間の距離を求める関数
