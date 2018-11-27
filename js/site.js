@@ -6,6 +6,14 @@
 
   Source: https://stackoverflow.com/questions/1527803/generating-random-whole-numbers-in-javascript-in-a-specific-range
 */
+function setup() {
+  createCanvas(400, 400);
+}
+
+function draw() {
+  background(220);
+}
+
 function randomNumber (min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -147,10 +155,10 @@ function Particle(){
   switch(randColor)
   {
     case 0:
-      this.color = color(110,57,204);
+      this.color = color(50,50,50);
       break;
     case 1:
-      this.color = color(7,153,242);
+      this.color = color(100,100,100);
       break;
     case 2:
       this.color = color(255,255,255);
@@ -164,9 +172,10 @@ function Particle(){
     while(iterations > 0){
       var angle = noise(this.pos.x/noiseScale, this.pos.y/noiseScale)*TWO_PI*noiseScale*this.flip;
       this.vel.x = cos(angle);
-      this.vel.y = sin(angle);
-      this.vel.mult(simulationSpeed);
-      this.pos.add(this.vel);
+      this.vel.y = sin(270);
+      this.vel.mult(.9);
+      this.pos.add(.09);
+      
       --iterations;
     }
   }
@@ -204,11 +213,6 @@ function advanceVisual()
 }
 
 function keyPressed()
-{
-  advanceVisual();
-}
-
-function touchStarted()
 {
   advanceVisual();
 }
