@@ -1,20 +1,12 @@
-/*
-  Returns a random whole number between minimum value and maximum value
-
-  For example, calling randomNumber(0, 255);
-  will return a random whole number between 0 and 255.
-
-  Source: https://stackoverflow.com/questions/1527803/generating-random-whole-numbers-in-javascript-in-a-specific-range
-*/
 function setup() {
-  createCanvas(400, 400);
+  createCanvas(1500, 800);
 }
 
 function draw() {
   background(220);
 }
 
-function randomNumber (min, max) {
+function randomNumber(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
@@ -26,17 +18,18 @@ function randomNumber (min, max) {
 
   Source: https://stackoverflow.com/questions/9724404/random-floating-point-double-in-inclusive-range
 */
-function randomFloat (min, max) {
+function randomFloat(min, max) {
   var float = Math.random();
   var value;
 
   if (float < 0.5) {
-    value = (1 - Math.random()) * (max-min) + min;
+    value = (1 - Math.random()) * (max - min) + min;
   } else {
-    value = Math.random() * (max-min) + min;
+    value = Math.random() * (max - min) + min;
   }
 
   return parseFloat(value.toFixed(2));
+
 }
 
 
@@ -56,163 +49,159 @@ function hslColor(h, s, l) {
 }
 
 
-/* START WRITING YOUR CODE BELOW */
+/* START HERE */
 
 // Justin Chambers
 // 03/2018
 
-var particles = [];
+var particles = [2];
 var nums;
-var particleDensity = 4000;
-var noiseScale = 800;
+var particleDensity = 2000;
+var noiseScale = 300;
 var maxLife = 10;
-var simulationSpeed = 0.2;
-var fadeFrame = 0;
-var backgroundColor;
-var visualMode = 0;
-var numModes = 4;
-var invertColors = false;
+var simulationSpeed = 1.9;
+var fadeFrame = 6;
+var backgroundColor = (0, 0, 0);
+var visualMode = 2;
+var numModes = 5;
+var invertColors = true;
 
-function setup(){
+function setup() {
   nums = windowWidth * windowHeight / particleDensity;
   backgroundColor = color(20, 20, 20);
   createCanvas(windowWidth, windowHeight);
   background(backgroundColor);
-  for(var i = 0; i < nums; i++){
+  for (var i = 0; i < nums; i++) {
     particles[i] = new Particle();
   }
 }
 
-function draw(){
+function draw() {
   noStroke();
-  
+
   ++fadeFrame;
-  if(fadeFrame % 5 == 0){
-    if(invertColors){
-      blendMode(ADD);
-    } else {
+  if (fadeFrame % 1 == 0) {
+    if (invertColors) {
       blendMode(DIFFERENCE);
+    } else {
+      blendMode(ADD);
     }
     fill(1, 1, 1);
-    rect(0,0,width,height);
+    rect(0, 0, width, height);
 
-    if(invertColors){
+    if (invertColors) {
       blendMode(DARKEST);
     } else {
       blendMode(LIGHTEST);
     }
     fill(backgroundColor);
-    rect(0,0,width,height);
+
   }
-  
+
   blendMode(BLEND);
   smooth();
-  for(var i = 0; i < nums; i++){
-    var iterations = map(i,0,nums,5,1);
-    var radius = map(i,0,nums,2,6);
-    
+  for (var i = 0; i < nums; i++) {
+    var iterations = map(i, 0, nums, 8, 1);
+    var radius = map(i, 0, nums, 2, 4);
+
     particles[i].move(iterations);
     particles[i].checkEdge();
-    
-    var alpha = 255;
+
+    var alpha = 200;
     var particleColor;
     var fadeRatio;
     fadeRatio = min(particles[i].life * 5 / maxLife, 1);
     fadeRatio = min((maxLife - particles[i].life) * 5 / maxLife, fadeRatio);
     var colorCase = visualMode;
-    if(visualMode == 0)
-    {
-      colorCase = int(particles[i].pos.x / width * 3) + 1;
+    if (visualMode == 0) {
+      colorCase = int(particles[i].pos.x / width) + 1;
     }
-    switch(colorCase)
-    {
+    switch (colorCase) {
       case 1:
-        var lifeRatioGrayscale = min(255, (255 * particles[i].life / maxLife) + red(backgroundColor));
+        var lifeRatioGrayscale = min(150, (0 * particles[i].life / maxLife) + blue(backgroundColor));
         particleColor = color(lifeRatioGrayscale, alpha * fadeRatio);
         break;
       case 2:
         particleColor = particles[i].color;
         break;
       case 3:
-        particleColor = color(blue(particles[i].color) + 70, green(particles[i].color) + 20, red(particles[i].color) - 50);
+        particleColor = color(blue(particles[i].color) + 0, green(particles[i].color) + 0, red(particles[i].color) - 0);
         break;
     }
-    if(invertColors){
-      particleColor = color(255 - red(particleColor), 255 - green(particleColor), 255 - blue(particleColor));
+    if (invertColors) {
+      particleColor = color(200 - red(particleColor), 200 - green(particleColor), 200 - blue(particleColor));
     }
     fill(red(particleColor), green(particleColor), blue(particleColor), alpha * fadeRatio);
     particles[i].display(radius);
-  } 
+  }
 }
 
-function Particle(){
-// member properties and initialization
+function Particle() {
+  // member properties and initialization
   this.vel = createVector(0, 0);
   this.pos = createVector(random(0, width), random(0, height));
-  this.life = random(0, maxLife);
-  this.flip = int(random(0,2)) * 2 - 1;
-  var randColor = int(random(0,3));
-  switch(randColor)
-  {
+  this.life = random(0, 20);
+  this.flip = int(random(0, 5)) * 2 - 1;
+  var randColor = int(random(0, 2));
+  switch (randColor) {
     case 0:
-      this.color = color(50,50,50);
+      this.color = color(10, 10, 10);
       break;
     case 1:
-      this.color = color(100,100,100);
+      this.color = color(100, 100, 100);
       break;
     case 2:
-      this.color = color(255,255,255);
+      this.color = color(200, 200, 200);
       break;
   }
-  
-// member functions
-  this.move = function(iterations){
-    if((this.life -= 0.01666) < 0)
+
+
+  // member functions
+  this.move = function(iterations) {
+    if ((this.life -= 0.01666) < 0)
       this.respawn();
-    while(iterations > 0){
-      var angle = noise(this.pos.x/noiseScale, this.pos.y/noiseScale)*TWO_PI*noiseScale*this.flip;
-      this.vel.x = cos(angle);
+    while (iterations > 0) {
+      var angle = noise(this.pos.x / noiseScale, this.pos.y / noiseScale) * TWO_PI * noiseScale * this.flip;
+      this.vel.x = cos(180);
       this.vel.y = sin(270);
-      this.vel.mult(.9);
-      this.pos.add(.09);
-      
+      this.vel.mult(.5);
+      this.pos.add(.02);
       --iterations;
     }
   }
 
-  this.checkEdge = function(){
-    if(this.pos.x > width || this.pos.x < 0 || this.pos.y > height || this.pos.y < 0){
+
+  this.checkEdge = function() {
+    if (this.pos.x > width || this.pos.x < 0 || this.pos.y > height || this.pos.y < 0) {
       this.respawn();
     }
   }
-  
-  this.respawn = function(){
+
+  this.respawn = function() {
     this.pos.x = random(0, width);
     this.pos.y = random(0, height);
     this.life = maxLife;
   }
 
-  this.display = function(r){
+  this.display = function(r) {
     ellipse(this.pos.x, this.pos.y, r, r);
   }
 }
 
-function advanceVisual()
-{
+function advanceVisual() {
   visualMode = ++visualMode % numModes;
-  if(visualMode == 0){
+  if (visualMode == 5) {
     invertColors = !invertColors;
-    backgroundColor = invertColors ? color(235, 235, 235) : color(20, 20, 20);
+    backgroundColor = invertColors ? color(0, 0, 0) : color(155, 155, 155);
   }
-  noiseSeed(random()*Number.MAX_SAFE_INTEGER);
+  noiseSeed(random(0, 66));
   background(backgroundColor);
-  for(var i = 0; i < nums; i++){
+  for (var i = 0; i < nums; i++) {
     particles[i].respawn();
-    particles[i].life = random(0,maxLife);
+    particles[i].life = random(0, maxLife);
   }
 }
 
-function keyPressed()
-{
+function keyPressed() {
   advanceVisual();
 }
