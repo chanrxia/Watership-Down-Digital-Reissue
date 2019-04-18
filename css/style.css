@@ -345,17 +345,17 @@ h2 {
 }
 
 .watercolor-background1 {
-  position: fixed; 
+  position: absolute; 
   background-size: auto;
  }
 
 .watercolor-background2 {
-  position: fixed; 
+  position: absolute; 
   background-size: auto;
 }
 
 .watercolor-background3 {
-  position: fixed; 
+  position: absolute; 
   top: 0; 
   left: 0; 
 	
