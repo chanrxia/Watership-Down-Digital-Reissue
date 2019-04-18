@@ -16,7 +16,7 @@ canvas {
 }
 
 .container {
-  position: absolute;
+  position: relative;
   width: 1500px;
   height: 50px;
 }
