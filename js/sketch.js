@@ -1,4 +1,5 @@
-function draw() {
+$(document).ready(function () {
+	function draw() {
   background(500);
 }
 
@@ -68,4 +69,5 @@ function Particle(x, y){
 	this.display = function(r){
 		ellipse(this.pos.x, this.pos.y, r, r);
 	}
+}
 }
